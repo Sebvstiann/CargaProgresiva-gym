@@ -1,0 +1,89 @@
+{% load static %}
+{% load crispy_forms_tags %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Iniciar Sesión</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredericka+the+Great&display=swap" rel="stylesheet">
+    <link href='https://fonts.googleapis.com/css?family=Cabin+Condensed:700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+</head>
+<body>
+    <div class="loading wave">
+        CONQUISTA DISCIPLINA ESFUERZO FUERZA MÚSCULOS CARGA ENTRENAMIENTO PROGRESIVA SACRIFICIO RUTINA PROGRESO ESTÉTICA RESULTADOS 
+    </div>
+
+    <div class="container" id="container">
+        <div class="form-container sign-up-container">
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="register" value="1">
+                <h1>Crear Cuenta</h1>
+                {% if register_form.errors %}
+                    <div class="error-message">
+                        Por favor corrige los errores del formulario.
+                    </div>
+                {% endif %}
+                {{ register_form|crispy }}
+                <button type="submit">Inscribirse</button>
+                <div class="mobile-toggle">
+                    <button type="button" class="ghost" id="signInMobile">¿Ya tienes cuenta? Inicia sesión</button>
+                </div>
+            </form>
+        </div>
+        <div class="form-container sign-in-container">
+            <form method="post" action="{% url 'login' %}" novalidate>
+                {% csrf_token %}
+                <h1>Bienvenido</h1>
+                {% if messages %}
+                    {% for message in messages %}
+                        {% if message.tags == 'success' %}
+                            <div class="success-message">
+                                {{ message }}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+                {% if form.errors %}
+                    <div class="error-message">Usuario o contraseña incorrectos.</div>
+                {% endif %}
+                {{ form.username|as_crispy_field }}
+                {{ form.password|as_crispy_field }}
+                <button type="submit">Iniciar sesión</button>
+                <div class="mobile-toggle">
+                    <button type="button" class="ghost" id="signUpMobile">¿No tienes cuenta? Regístrate</button>
+                </div>
+            </form>
+        </div>
+        <div class="overlay-container">
+            <div class="overlay">
+                <div class="overlay-panel overlay-left">
+                    <h1>Iniciar Sesión</h1>
+                    <p>Si antes ya te creaste una cuenta con nosotros, por favor inicia sesión con tu información personal</p>
+                    <button class="ghost" id="signIn">Iniciar Sesión</button>
+                </div>
+                <div class="overlay-panel overlay-right">
+                    <h1>¡Hola, Amigo!</h1>
+                    <p>Ingresa tus datos personales y comienza tus entrenamientos con nosotros.</p>
+                    <button class="ghost" id="signUp">Inscribirse</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>
+            Created by Sebastian Schafer - Contacto: +56932323232
+            <br>
+            Todos los derechos reservados
+        </p>
+    </footer>
+
+    <script src="{% static 'js/login.js' %}"></script>
+</body>
+</html>

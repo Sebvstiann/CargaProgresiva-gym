@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Ver Registros{% endblock %}
+
+{% block content %}
+
+<h2 class="mb-4">Registros de Entrenamiento</h2>
+
+<form method="get" class="row mb-4">
+    <div class="col-md-3">
+        <label for="rutina" class="form-label">Filtrar por Rutina:</label>
+        <select name="rutina" id="rutina" class="form-select">
+            <option value="">-- Todas --</option>
+            {% for rutina in rutinas %}
+                <option value="{{ rutina.id }}" {% if rutina.id == rutina_seleccionada %}selected{% endif %}>
+                    {{ rutina.nombre }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="col-md-3">
+        <label for="ejercicio" class="form-label">Filtrar por Ejercicio:</label>
+        <select name="ejercicio" id="ejercicio" class="form-select">
+            <option value="">-- Todos --</option>
+            {% for ejercicio in ejercicios %}
+                <option value="{{ ejercicio.id }}" {% if ejercicio.id == ejercicio_seleccionado %}selected{% endif %}>
+                    {{ ejercicio.nombre }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="col-md-3">
+        <label for="fecha_inicio" class="form-label">Fecha Inicio:</label>
+        <input type="date" name="fecha_inicio" id="fecha_inicio" class="form-control" value="{{ fecha_inicio|date:'Y-m-d' }}">
+    </div>
+
+    <div class="col-md-3">
+        <label for="fecha_fin" class="form-label">Fecha Fin:</label>
+        <input type="date" name="fecha_fin" id="fecha_fin" class="form-control" value="{{ fecha_fin|date:'Y-m-d' }}">
+    </div>
+
+    <div class="col-12 mt-3">
+        <button type="submit" class="btn btn-primary">Filtrar</button>
+        <a href="{% url 'ver_registros' %}" class="btn btn-secondary">Limpiar Filtros</a>
+    </div>
+</form>
+
+<table class="table table-striped">
+    <thead class="table-dark">
+        <tr>
+ 
+            <th>Rutina</th>
+            <th>Ejercicio</th>
+            <th>Series</th>
+            <th>Peso (kg)</th>
+            <th>Reps 1ª</th>
+            <th>Reps 2ª</th>
+            <th>Reps 3ª</th>
+            <th>Rendimiento</th>
+            <th>Observaciones</th>
+            <th>Fecha</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for registro in registros %}
+            <tr>
+                <td>{{ registro.rutina.nombre }}</td>
+                <td>{{ registro.ejercicio.nombre }}</td>
+                <td>{{ registro.series }}</td>
+                <td>{{ registro.peso_agregado_KG }}</td>
+                <td>{{ registro.repeticiones_en_la_primera_serie }}</td>
+                <td>{{ registro.repeticiones_en_la_segunda_serie }}</td>
+                <td>{{ registro.repeticiones_en_la_tercera_serie }}</td>
+                <td>{{ registro.rendimiento_percibido }}</td>
+                <td>{{ registro.observaciones }}</td>
+                <td>{{ registro.fecha_hora|date:"d/m/Y H:i" }}</td>
+                <td>
+                    <a href="" class="btn btn-sm btn-warning">Editar</a>
+                    <form method="post" action="{% url 'eliminar_registro' registro.id %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Eliminar este registro?');">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="12">No se encontraron registros.</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
+
+{% endblock %}

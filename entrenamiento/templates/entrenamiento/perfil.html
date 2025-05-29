@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Mi Perfil{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background: #444345;
+        min-height: 100vh;
+        padding: 20px;
+    }
+    .card {
+        box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+    }
+</style>
+<div class="container py-5">
+    <div class="row">
+        <!-- Información del Perfil -->
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-body text-center">
+                    {% if user.imagen %}
+                        <img src="{{ user.imagen.url }}" alt="avatar" class="rounded-circle img-fluid" style="width: 150px; height: 150px; object-fit: cover;">
+                    {% else %}
+                        <img src="{% static 'img/default-profile.png' %}" alt="avatar" class="rounded-circle img-fluid" style="width: 150px; height: 150px; object-fit: cover;">
+                    {% endif %}
+                    <h5 class="my-3">{{ user.username }}</h5>
+                    <p class="text-muted mb-1">{{ user.email }}</p>
+                    <div class="d-flex justify-content-center mb-2">
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editarPerfilModal">
+                            Editar Perfil
+                        </button>
+                        <button type="button" class="btn btn-outline-primary ms-1" data-bs-toggle="modal" data-bs-target="#cambiarPasswordModal">
+                            Cambiar Contraseña
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráficos de Progreso -->
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Progreso</h5>
+                        <select class="form-select" style="width: auto;" id="ejercicioSelect">
+                            <option value="">Seleccionar Ejercicio</option>
+                            {% for ejercicio in ejercicios %}
+                                <option value="{{ ejercicio.id }}">{{ ejercicio.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <canvas id="pesoChart"></canvas>
+                    <canvas id="repsChart" class="mt-4"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Editar Perfil -->
+<div class="modal fade" id="editarPerfilModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Editar Perfil</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" enctype="multipart/form-data" action="{% url 'actualizar_perfil' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Imagen de Perfil</label>
+                        <input type="file" class="form-control" name="imagen">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" name="email" value="{{ user.email }}">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Cambiar Contraseña -->
+<div class="modal fade" id="cambiarPasswordModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Cambiar Contraseña</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'cambiar_password' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Contraseña Actual</label>
+                        <input type="password" class="form-control" name="old_password">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nueva Contraseña</label>
+                        <input type="password" class="form-control" name="new_password1">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Confirmar Nueva Contraseña</label>
+                        <input type="password" class="form-control" name="new_password2">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Cambiar Contraseña</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const pesoCtx = document.getElementById('pesoChart').getContext('2d');
+    const repsCtx = document.getElementById('repsChart').getContext('2d');
+    let pesoChart, repsChart;
+
+    function initCharts(data) {
+        if (pesoChart) pesoChart.destroy();
+        if (repsChart) repsChart.destroy();
+
+        // Gráfico de Peso
+        pesoChart = new Chart(pesoCtx, {
+            type: 'line',
+            data: {
+                labels: data.fechas,
+                datasets: [{
+                    label: 'Peso (kg)',
+                    data: data.pesos,
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Progreso en Peso'
+                    }
+                }
+            }
+        });
+
+        // Gráfico de Repeticiones
+        repsChart = new Chart(repsCtx, {
+            type: 'line',
+            data: {
+                labels: data.fechas,
+                datasets: [{
+                    label: '1ª Serie',
+                    data: data.reps1,
+                    borderColor: 'rgb(255, 99, 132)',
+                    tension: 0.1
+                },
+                {
+                    label: '2ª Serie',
+                    data: data.reps2,
+                    borderColor: 'rgb(54, 162, 235)',
+                    tension: 0.1
+                },
+                {
+                    label: '3ª Serie',
+                    data: data.reps3,
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Progreso en Repeticiones'
+                    }
+                }
+            }
+        });
+    }
+
+    // Evento para cambio de ejercicio
+    document.getElementById('ejercicioSelect').addEventListener('change', function() {
+        const ejercicioId = this.value;
+        if (!ejercicioId) return;
+
+        fetch(`/app/obtener-progreso/${ejercicioId}/`)
+            .then(response => response.json())
+            .then(data => initCharts(data))
+            .catch(error => console.error('Error:', error));
+    });
+});
+</script>
+{% endblock %} 
