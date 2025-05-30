@@ -28,10 +28,9 @@ def redirect_to_login(request):
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('accounts/login/', CustomLoginView.as_view(), name='login'),
-    path('accounts/logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
-    path('app/', include('entrenamiento.urls')),
     path('', redirect_to_login, name='home'),
+    path('app/', include('entrenamiento.urls')),
+    path('logout/', auth_views.LogoutView.as_view(next_page='/app/login/'), name='logout'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:

@@ -35,6 +35,7 @@ class UsuarioRegistroForm(UserCreationForm):
 
     def save(self, commit=True):
         user = super().save(commit=False)
+        user.email = self.cleaned_data["email"]
         user.is_staff = False
         user.is_superuser = False
         if commit:
@@ -47,9 +48,12 @@ class RegistroEntrenamientoForm(forms.ModelForm):
         model = RegistroEntrenamiento
         fields = [
             'rutina', 'ejercicio',
-            'series', 'peso_agregado_KG',
-            'repeticiones_en_la_primera_serie', 'repeticiones_en_la_segunda_serie', 'repeticiones_en_la_tercera_serie',
-            'observaciones', 'rendimiento_percibido'
+            'peso_agregado_KG',
+            'repeticiones_en_la_primera_serie', 
+            'repeticiones_en_la_segunda_serie', 
+            'repeticiones_en_la_tercera_serie',
+            'observaciones', 
+            'rendimiento_percibido'
         ]
         widgets = {
             'observaciones': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
@@ -60,3 +64,25 @@ class RegistroEntrenamientoForm(forms.ModelForm):
         for field_name, field in self.fields.items():
             if field.widget.attrs.get('class') is None:
                 field.widget.attrs['class'] = 'form-control'
+
+
+class CompletarPerfilForm(forms.ModelForm):
+    class Meta:
+        model = Usuario
+        fields = ['peso', 'altura', 'edad', 'imagen']
+        labels = {
+            'peso': 'Peso (kg)',
+            'altura': 'Altura (cm)',
+            'edad': 'Edad',
+            'imagen': 'Foto de Perfil'
+        }
+        widgets = {
+            'peso': forms.NumberInput(attrs={'class': 'form-control', 'required': True}),
+            'altura': forms.NumberInput(attrs={'class': 'form-control', 'required': True}),
+            'edad': forms.NumberInput(attrs={'class': 'form-control', 'required': True}),
+            'imagen': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': 'image/*',
+                'onchange': 'previewImage(this)'
+            })
+        }

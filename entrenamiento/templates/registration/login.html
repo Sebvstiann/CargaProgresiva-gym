@@ -12,6 +12,24 @@
     <link href="https://fonts.googleapis.com/css2?family=Fredericka+the+Great&display=swap" rel="stylesheet">
     <link href='https://fonts.googleapis.com/css?family=Cabin+Condensed:700' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="{% static 'css/login.css' %}">
+    <style>
+        .error-message {
+            color: #dc3545;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+        .success-message {
+            color: #155724;
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+    </style>
 </head>
 <body>
     <div class="loading wave">
@@ -20,16 +38,32 @@
 
     <div class="container" id="container">
         <div class="form-container sign-up-container">
-            <form method="post">
+            <form method="post" id="register-form">
                 {% csrf_token %}
                 <input type="hidden" name="register" value="1">
                 <h1>Crear Cuenta</h1>
+                
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="{% if message.tags == 'error' %}error-message{% else %}success-message{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
                 {% if register_form.errors %}
                     <div class="error-message">
-                        Por favor corrige los errores del formulario.
+                        {% for field, errors in register_form.errors.items %}
+                            {% for error in errors %}
+                                <p>{{ field }}: {{ error }}</p>
+                            {% endfor %}
+                        {% endfor %}
                     </div>
                 {% endif %}
-                {{ register_form|crispy }}
+
+                <div id="register-form-fields">
+                    {{ register_form|crispy }}
+                </div>
                 <button type="submit">Inscribirse</button>
                 <div class="mobile-toggle">
                     <button type="button" class="ghost" id="signInMobile">¿Ya tienes cuenta? Inicia sesión</button>
@@ -37,23 +71,24 @@
             </form>
         </div>
         <div class="form-container sign-in-container">
-            <form method="post" action="{% url 'login' %}" novalidate>
+            <form method="post" action="{% url 'login' %}" novalidate id="login-form">
                 {% csrf_token %}
                 <h1>Bienvenido</h1>
                 {% if messages %}
                     {% for message in messages %}
-                        {% if message.tags == 'success' %}
-                            <div class="success-message">
-                                {{ message }}
-                            </div>
-                        {% endif %}
+                        <div class="{% if message.tags == 'error' %}error-message{% else %}success-message{% endif %}">
+                            {{ message }}
+                        </div>
                     {% endfor %}
                 {% endif %}
+                
                 {% if form.errors %}
                     <div class="error-message">Usuario o contraseña incorrectos.</div>
                 {% endif %}
-                {{ form.username|as_crispy_field }}
-                {{ form.password|as_crispy_field }}
+                
+                <div id="login-form-fields">
+                    {{ form|crispy }}
+                </div>
                 <button type="submit">Iniciar sesión</button>
                 <div class="mobile-toggle">
                     <button type="button" class="ghost" id="signUpMobile">¿No tienes cuenta? Regístrate</button>
@@ -85,5 +120,37 @@
     </footer>
 
     <script src="{% static 'js/login.js' %}"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Asegurarse de que los IDs sean únicos
+        const registerFields = document.querySelector('#register-form-fields');
+        if (registerFields) {
+            const inputs = registerFields.querySelectorAll('input');
+            inputs.forEach(input => {
+                if (input.id) {
+                    input.id = 'register_' + input.id;
+                }
+                const label = registerFields.querySelector(`label[for="${input.id}"]`);
+                if (label) {
+                    label.setAttribute('for', 'register_' + input.id);
+                }
+            });
+        }
+
+        const loginFields = document.querySelector('#login-form-fields');
+        if (loginFields) {
+            const inputs = loginFields.querySelectorAll('input');
+            inputs.forEach(input => {
+                if (input.id) {
+                    input.id = 'login_' + input.id;
+                }
+                const label = loginFields.querySelector(`label[for="${input.id}"]`);
+                if (label) {
+                    label.setAttribute('for', 'login_' + input.id);
+                }
+            });
+        }
+    });
+    </script>
 </body>
 </html>
