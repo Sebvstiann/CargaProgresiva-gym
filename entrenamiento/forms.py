@@ -2,7 +2,7 @@ from django import forms
 from .models import RegistroEntrenamiento
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from .models import Usuario
+from .models import Usuario, Ejercicio
 
 class UsuarioRegistroForm(UserCreationForm):
     email = forms.EmailField(required=True)
@@ -64,6 +64,22 @@ class RegistroEntrenamientoForm(forms.ModelForm):
         for field_name, field in self.fields.items():
             if field.widget.attrs.get('class') is None:
                 field.widget.attrs['class'] = 'form-control'
+
+        # Inicialmente, deshabilitamos el campo de ejercicio hasta que se seleccione una rutina
+        self.fields['ejercicio'].queryset = Ejercicio.objects.none()
+        self.fields['ejercicio'].widget.attrs['disabled'] = 'disabled'
+
+        # Si hay una rutina seleccionada (en caso de edición o POST)
+        if 'rutina' in self.data:
+            try:
+                rutina_id = int(self.data.get('rutina'))
+                self.fields['ejercicio'].queryset = Ejercicio.objects.filter(rutina_id=rutina_id)
+                self.fields['ejercicio'].widget.attrs.pop('disabled', None)
+            except (ValueError, TypeError):
+                pass
+        elif self.instance.pk and self.instance.rutina:
+            self.fields['ejercicio'].queryset = Ejercicio.objects.filter(rutina=self.instance.rutina)
+            self.fields['ejercicio'].widget.attrs.pop('disabled', None)
 
 
 class CompletarPerfilForm(forms.ModelForm):

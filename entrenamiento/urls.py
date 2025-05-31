@@ -14,4 +14,6 @@ urlpatterns = [
     path('ver-registros/', views.ver_registros, name='ver_registros'),
     path('exportar-registros/', views.exportar_registros_excel, name='exportar_registros_excel'),
     path('eliminar-registro/<int:registro_id>/', views.eliminar_registro, name='eliminar_registro'),
+    path('ejercicios-por-rutina/<int:rutina_id>/', views.ejercicios_por_rutina, name='ejercicios_por_rutina'),
+    path('ejercicio-info/<int:ejercicio_id>/', views.ejercicio_info, name='ejercicio_info'),
 ]

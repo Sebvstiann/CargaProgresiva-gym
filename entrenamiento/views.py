@@ -14,6 +14,22 @@ from openpyxl import Workbook
 from datetime import datetime
 
 @login_required
+def ejercicios_por_rutina(request, rutina_id):
+    """Vista para obtener los ejercicios de una rutina específica"""
+    ejercicios = Ejercicio.objects.filter(rutina_id=rutina_id).values('id', 'nombre')
+    return JsonResponse({'ejercicios': list(ejercicios)})
+
+@login_required
+def ejercicio_info(request, ejercicio_id):
+    """Vista para obtener la información detallada de un ejercicio"""
+    ejercicio = get_object_or_404(Ejercicio, id=ejercicio_id)
+    return JsonResponse({
+        'nombre': ejercicio.nombre,
+        'descripcion': ejercicio.descripcion,
+        'imagen': ejercicio.imagen.url if ejercicio.imagen else None
+    })
+
+@login_required
 def inicio(request):
     if not request.user.perfil_completo():
         return redirect('completar_perfil')

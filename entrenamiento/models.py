@@ -35,9 +35,30 @@ class Rutina(models.Model):
 
 class Ejercicio(models.Model):
     nombre = models.CharField(max_length=100)
+    rutina = models.ForeignKey(
+        Rutina,
+        on_delete=models.CASCADE,
+        related_name='ejercicios',
+        null=True,
+        blank=True
+    )
+    imagen = models.ImageField(
+        upload_to='ejercicios/',
+        null=True,
+        blank=True,
+        help_text='Imagen de referencia del ejercicio'
+    )
+    descripcion = models.TextField(
+        blank=True,
+        null=True,
+        help_text='Descripción y técnica del ejercicio'
+    )
 
     def __str__(self):
-        return self.nombre
+        return f"{self.nombre} - {self.rutina.nombre if self.rutina else 'Sin rutina'}"
+
+    class Meta:
+        ordering = ['rutina', 'nombre']
 
 class RegistroEntrenamiento(models.Model):
     RENDIMIENTO_CHOICES = [
@@ -59,6 +80,11 @@ class RegistroEntrenamiento(models.Model):
     repeticiones_en_la_tercera_serie = models.IntegerField(default=0)
     observaciones = models.TextField(blank=True, null=True)
     rendimiento_percibido = models.IntegerField(choices=RENDIMIENTO_CHOICES, default=3)
+
+    def clean(self):
+        """Validar que el ejercicio pertenezca a la rutina seleccionada"""
+        if self.ejercicio and self.rutina and self.ejercicio.rutina != self.rutina:
+            raise models.ValidationError('El ejercicio debe pertenecer a la rutina seleccionada.')
 
     def __str__(self):
         return f"{self.usuario.username} - {self.ejercicio.nombre} - {self.fecha_hora}"
