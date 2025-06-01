@@ -4,12 +4,70 @@
 
 {% block title %}Registrar Entrenamiento{% endblock %}
 
+{% block extra_css %}
+<style>
+    .card {
+        margin-bottom: 0;
+    }
+
+    .card-body {
+        padding: 1rem !important;
+    }
+
+    .form-group {
+        margin-bottom: 0.75rem;
+    }
+
+    .form-control {
+        padding: 0.4rem 0.75rem;
+    }
+
+    .form-label {
+        margin-bottom: 0.25rem;
+    }
+
+    #ejercicio-info {
+        margin-bottom: 0.75rem;
+    }
+
+    #ejercicio-imagen {
+        max-height: 200px;
+    }
+
+    .messages-container {
+        margin-bottom: 0.75rem !important;
+    }
+
+    .alert {
+        padding: 0.5rem 1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .container-fluid {
+        padding: 0.75rem;
+    }
+
+    .row {
+        margin: 0;
+    }
+
+    textarea.form-control {
+        height: 80px;
+        min-height: 80px;
+    }
+
+    .btn {
+        padding: 0.4rem 1rem;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
             {% if messages %}
-            <div class="messages-container mb-4">
+            <div class="messages-container">
                 {% for message in messages %}
                 <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
                     {% if message.tags == 'success' %}
@@ -25,13 +83,13 @@
             {% endif %}
 
             <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white py-3">
+                <div class="card-header bg-primary text-white py-2">
                     <h4 class="card-title mb-0">
                         <i class="fas fa-dumbbell me-2"></i>Registrar Entrenamiento
                     </h4>
                 </div>
-                <div class="card-body p-4">
-                    <form method="post" class="row g-4">
+                <div class="card-body">
+                    <form method="post" class="row g-2">
                         {% csrf_token %}
                         
                         <div class="col-md-6">
@@ -42,12 +100,11 @@
                             {{ form.ejercicio|as_crispy_field }}
                         </div>
 
-                        <!-- Contenedor para la imagen del ejercicio -->
                         <div class="col-12">
                             <div id="ejercicio-info" class="card d-none">
                                 <div class="row g-0">
                                     <div class="col-12 text-center position-relative">
-                                        <img id="ejercicio-imagen" src="" alt="Imagen del ejercicio" class="img-fluid rounded" style="max-height: 300px; object-fit: contain;">
+                                        <img id="ejercicio-imagen" src="" alt="Imagen del ejercicio" class="img-fluid rounded">
                                         <button type="button" class="btn btn-info btn-sm position-absolute top-0 end-0 m-2" data-bs-toggle="modal" data-bs-target="#ejercicioModal">
                                             <i class="fas fa-info-circle"></i>
                                         </button>
@@ -76,16 +133,16 @@
                             {{ form.repeticiones_en_la_tercera_serie|as_crispy_field }}
                         </div>
                         
-                        <div class="col-12">
+                        <div class="col-md-8">
                             {{ form.observaciones|as_crispy_field }}
                         </div>
                         
-                        <div class="col-12 text-end">
+                        <div class="col-md-4 d-flex align-items-end justify-content-end">
                             <a href="{% url 'ver_registros' %}" class="btn btn-outline-secondary me-2">
                                 <i class="fas fa-times me-1"></i>Cancelar
                             </a>
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save me-1"></i>Guardar Registro
+                                <i class="fas fa-save me-1"></i>Guardar
                             </button>
                         </div>
                     </form>
@@ -112,125 +169,6 @@
 {% endblock %}
 
 {% block extra_js %}
-<style>
-.modal-header.bg-primary {
-    background-color: #2c3e50 !important;
-}
-
-.descripcion-ejercicio {
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    color: #2c3e50;
-    padding: 1rem;
-}
-
-.descripcion-ejercicio h5 {
-    color: #2c3e50;
-    font-size: 1.4rem;
-    font-weight: 600;
-    margin-top: 2rem;
-    margin-bottom: 1.5rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 2px solid #3498db;
-    display: inline-block;
-}
-
-.descripcion-ejercicio p {
-    margin-bottom: 1.2rem;
-    line-height: 1.8;
-    font-size: 1.1rem;
-    color: #34495e;
-}
-
-.descripcion-ejercicio ul {
-    padding-left: 0;
-    margin-bottom: 1.5rem;
-    list-style: none;
-}
-
-.descripcion-ejercicio .pasos-lista {
-    list-style-type: none;
-    padding-left: 0;
-    counter-reset: paso;
-}
-
-.descripcion-ejercicio .pasos-lista li {
-    position: relative;
-    margin-bottom: 1.2rem;
-    padding: 0.8rem 1rem 0.8rem 3rem;
-    background-color: #f8f9fa;
-    border-radius: 8px;
-    font-size: 1.1rem;
-    line-height: 1.6;
-    counter-increment: paso;
-}
-
-.descripcion-ejercicio .pasos-lista li::before {
-    content: counter(paso);
-    position: absolute;
-    left: 0.8rem;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 1.8rem;
-    height: 1.8rem;
-    background-color: #3498db;
-    color: white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.9rem;
-    font-weight: 600;
-}
-
-.descripcion-ejercicio li {
-    margin-bottom: 0.8rem;
-    line-height: 1.6;
-    font-size: 1.1rem;
-    color: #34495e;
-}
-
-.descripcion-ejercicio h5:first-child {
-    margin-top: 0;
-}
-
-.descripcion-ejercicio .musculos-lista {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    padding: 0;
-    list-style: none;
-}
-
-.descripcion-ejercicio .musculos-lista li {
-    background-color: #e8f4fd;
-    color: #2c3e50;
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    margin: 0;
-    font-weight: 500;
-}
-
-.descripcion-ejercicio .consejos-lista {
-    padding: 0;
-    list-style: none;
-}
-
-.descripcion-ejercicio .consejos-lista li {
-    position: relative;
-    padding: 0.8rem 1rem 0.8rem 2.5rem;
-    background-color: #fff3cd;
-    border-radius: 8px;
-    margin-bottom: 1rem;
-}
-
-.descripcion-ejercicio .consejos-lista li::before {
-    content: "💡";
-    position: absolute;
-    left: 0.8rem;
-    top: 50%;
-    transform: translateY(-50%);
-}
-</style>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const rutinaSelect = document.getElementById('id_rutina');

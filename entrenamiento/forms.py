@@ -56,7 +56,12 @@ class RegistroEntrenamientoForm(forms.ModelForm):
             'rendimiento_percibido'
         ]
         widgets = {
-            'observaciones': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'observaciones': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 2,
+                'style': 'resize: none;',
+                'placeholder': 'Notas adicionales sobre el entrenamiento...'
+            }),
         }
 
     def __init__(self, *args, **kwargs):
