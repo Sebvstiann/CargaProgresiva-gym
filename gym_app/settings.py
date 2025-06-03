@@ -57,9 +57,9 @@ STATICFILES_DIRS = [
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 AUTH_USER_MODEL = 'entrenamiento.Usuario'
-LOGIN_URL = 'login'
+LOGIN_URL = '/app/login/'
 LOGIN_REDIRECT_URL = '/app/'
-LOGOUT_REDIRECT_URL = '/accounts/login/'
+LOGOUT_REDIRECT_URL = '/app/login/'
 
 
 MIDDLEWARE = [

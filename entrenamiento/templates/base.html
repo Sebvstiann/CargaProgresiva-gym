@@ -2,85 +2,437 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}Mi App de Entrenamientos{% endblock %}</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Carga Progresiva{% endblock %}</title>
+    {% load static %}
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        :root {
+            --primary-color: #6b46c1;
+            --primary-light: #9f7aea;
+            --primary-dark: #44337a;
+            --secondary-color: #805ad5;
+            --secondary-light: #b794f4;
+            --secondary-dark: #553c9a;
+            --accent-color: #e9d8fd;
+            --accent-light: #faf5ff;
+            --accent-dark: #d6bcfa;
+            --background-color: #1a1a2e;
+            --surface-color: #2a2a3e;
+            --text-color: #e2e8f0;
+            --text-light: #ffffff;
+            --text-muted: #a0aec0;
+            --success-color: #48bb78;
+            --warning-color: #ecc94b;
+            --error-color: #f56565;
+            --border-color: #4a5568;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+        
+        main {
+            flex: 1;
+            padding: 1rem 0;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)) !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            margin-bottom: 0;
+            border-bottom: 2px solid var(--secondary-light);
+            padding: 0.5rem 1rem;
+            height: 64px;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--text-light) !important;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .navbar-nav {
+            display: flex;
+            align-items: center;
+            height: 100%;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            height: 100%;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            height: 100%;
+            padding: 0 1rem !important;
+            color: rgba(255,255,255,0.9) !important;
+        }
+
+        .nav-item .btn-link {
+            color: rgba(255,255,255,0.9) !important;
+            border: none;
+            background: none;
+            padding: 0;
+            font-size: 1.2rem;
+        }
+
+        .nav-item .btn-link:hover {
+            color: var(--secondary-light) !important;
+        }
+
+        .nav-item .btn-link:focus {
+            box-shadow: none;
+        }
+
+        .profile-link {
+            display: flex;
+            align-items: center;
+            padding-right: 1.5rem !important;
+        }
+
+        .profile-link img,
+        .profile-link .fa-user-circle {
+            margin-right: 0.5rem;
+        }
+
+        .nav-link i {
+            margin-right: 0.5rem;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            left: 1rem;
+            right: 1rem;
+            bottom: -2px;
+            width: calc(100% - 2rem);
+            height: 2px;
+            background-color: var(--secondary-light);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+            transform-origin: center;
+        }
+
+        .nav-link:hover::after,
+        .nav-link.active::after {
+            transform: scaleX(1);
+        }
+
+        .nav-link:hover {
+            color: var(--secondary-light) !important;
+        }
+
+        .nav-link.active {
+            color: var(--secondary-light) !important;
+            font-weight: 600;
+        }
+
+        .dropdown-menu {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .dropdown-item {
+            color: var(--text-color);
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--background-light);
+            color: var(--secondary-color);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+            border: none;
+            box-shadow: 0 4px 12px rgba(107,70,193,0.3);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(107,70,193,0.4);
+        }
+
+        .card {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)) !important;
+            border-bottom: none;
+            padding: 1.2rem 1.5rem;
+        }
+
+        .card-header h4 {
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        footer {
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+            color: var(--text-light);
+            padding: 1rem 0;
+            margin-top: auto;
+            font-size: 0.9rem;
+            border-top: 2px solid var(--secondary-light);
+        }
+
+        footer .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        footer p {
+            margin: 0;
+        }
+
+        footer .copyright {
+            opacity: 0.9;
+        }
+
+        footer a {
+            color: var(--secondary-color);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        footer a:hover {
+            color: var(--secondary-light);
+            transform: translateY(-2px);
+        }
+
+        .contact-button {
+            display: inline-flex;
+            align-items: center;
+            background: linear-gradient(135deg, var(--secondary-color), var(--secondary-dark));
+            color: white !important;
+            padding: 0.6rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(107,70,193,0.2);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .contact-button:hover {
+            background: linear-gradient(135deg, var(--secondary-dark), var(--secondary-color));
+            color: white !important;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(107,70,193,0.3);
+        }
+
+        .contact-button i {
+            font-size: 1.2rem;
+            margin-right: 0.5rem;
+        }
+
+        .form-control {
+            background-color: var(--surface-color);
+            border: 2px solid var(--border-color);
+            color: var(--text-color);
+        }
+
+        .form-control:focus {
+            background-color: var(--surface-color);
+            border-color: var(--secondary-light);
+            color: var(--text-color);
+            box-shadow: 0 0 0 0.25rem rgba(159,122,234,0.15);
+        }
+
+        .form-control::placeholder {
+            color: var(--text-muted);
+        }
+
+        .form-label {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        select.form-control option {
+            background-color: var(--background-light);
+            color: var(--text-color);
+        }
+
+        .alert {
+            border: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #00c853, #69f0ae);
+            color: white;
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, #ff1744, #ff5252);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            footer .container {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+            .navbar {
+                padding: 0.5rem 1rem;
+            }
+            .nav-link {
+                padding: 0.75rem 1rem !important;
+                margin: 0;
+            }
+            .nav-link::after {
+                bottom: 0;
+                left: 0;
+                right: 0;
+                width: 100%;
+            }
+        }
+
+        .table {
+            background-color: #ffffff;
+            color: #2d3748;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .table thead th {
+            background-color: var(--primary-color);
+            color: #ffffff;
+            border-bottom: none;
+            padding: 1rem;
+            font-weight: 600;
+        }
+
+        .table tbody tr {
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .table tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        .table td {
+            padding: 1rem;
+            color: #2d3748;
+            background-color: #ffffff;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f7fafc;
+        }
+
+        .table-responsive {
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        .navbar-nav .nav-item {
+            position: relative;
+            margin: 0 0.25rem;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <!-- Navbar Offcanvas -->
-    <nav class="navbar navbar-dark bg-dark fixed-top">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">Carga progresiva</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasDarkNavbar" aria-controls="offcanvasDarkNavbar" aria-label="Toggle navigation">
+    {% if user.is_authenticated and request.path != '/app/completar-perfil/' %}
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="{% url 'inicio' %}">
+                <i class="fas fa-dumbbell me-2"></i>
+                <span>Carga Progresiva</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="offcanvas offcanvas-end text-bg-dark" tabindex="-1" id="offcanvasDarkNavbar" aria-labelledby="offcanvasDarkNavbarLabel">
-                <div class="offcanvas-header">
-                    <h5 class="offcanvas-title" id="offcanvasDarkNavbarLabel">Menú</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
-                </div>
-                <div class="offcanvas-body">
-                    <ul class="navbar-nav justify-content-end flex-grow-1 pe-3">
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'registrar_entrenamiento' %}">Inicio</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'ver_registros' %}">Ver registros</a>
-                        </li>
-                        
-                        {% if user.is_authenticated %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'perfil' %}">Mi Perfil</a>
-                        </li>
-                        <li class="nav-item">
-                            <form method="post" action="{% url 'logout' %}">
-                                {% csrf_token %}
-                                <button class="btn btn-link nav-link" type="submit" style="padding: 0; border: none;">Cerrar sesión</button>
-                            </form>
-                        </li>
-                        {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'registro' %}">Registrar cuenta</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'login' %}">Iniciar sesión</a>
-                        </li>
-                        {% endif %}
-                    </ul>
-                    
-
-                    <!-- Si quieres mantener la búsqueda, descomenta abajo -->
-                    <!--
-                    <form class="d-flex mt-3" role="search">
-                        <input class="form-control me-2" type="search" placeholder="Buscar" aria-label="Buscar">
-                        <button class="btn btn-success" type="submit">Buscar</button>
-                    </form>
-                    -->
-                </div>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/app/registrar-entrenamiento/' %}active{% endif %}" 
+                           href="{% url 'registrar_entrenamiento' %}">
+                            <i class="fas fa-plus-circle me-1"></i>Registrar Entrenamiento
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/app/ver-registros/' %}active{% endif %}" 
+                           href="{% url 'ver_registros' %}">
+                            <i class="fas fa-list me-1"></i>Ver Registros
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav align-items-center">
+                    <li class="nav-item">
+                        <a class="nav-link profile-link" href="{% url 'perfil' %}">
+                            {% if user.imagen %}
+                                <img src="{{ user.imagen.url }}" alt="Perfil" class="rounded-circle" 
+                                     style="width: 35px; height: 35px; object-fit: cover;">
+                            {% else %}
+                                <i class="fas fa-user-circle fa-2x"></i>
+                            {% endif %}
+                            <span>{{ user.username }}</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <form method="post" action="{% url 'logout' %}" class="nav-link">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-link" title="Cerrar Sesión">
+                                <i class="fas fa-sign-out-alt"></i>
+                            </button>
+                        </form>
+                    </li>
+                </ul>
             </div>
         </div>
     </nav>
+    {% endif %}
 
-    <!-- Espaciado para que el contenido no quede oculto debajo del navbar fijo -->
-    <div class="container" style="padding-top: 80px;">
+    <main class="py-4">
+        {% block content %}{% endblock %}
+    </main>
 
-        <!-- Mensajes de Django -->
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-                </div>
-            {% endfor %}
-        {% endif %}
+    <footer>
+        <div class="container">
+            <div class="copyright">
+                Created by Sebastian Schafer | Todos los derechos reservados
+            </div>
+            <a href="https://wa.me/56932323232" target="_blank" class="contact-button">
+                <i class="fab fa-whatsapp"></i>
+                Contáctame
+            </a>
+        </div>
+    </footer>
 
-        <!-- Contenido específico de cada vista -->
-        {% block content %}
-        {% endblock %}
-    </div>
-
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    {% block extra_js %}{% endblock %}
 </body>
 </html>

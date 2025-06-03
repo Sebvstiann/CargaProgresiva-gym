@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Bienvenido a tu Entrenamiento Personal</h1>
+    
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Registrar Entrenamiento</h5>
+                    <p class="card-text">Registra tu sesión de entrenamiento diaria.</p>
+                    <a href="{% url 'registrar_entrenamiento' %}" class="btn btn-primary">Ir a Registrar</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Ver Registros</h5>
+                    <p class="card-text">Revisa tu historial de entrenamientos.</p>
+                    <a href="{% url 'ver_registros' %}" class="btn btn-primary">Ver Historial</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Mi Perfil</h5>
+                    <p class="card-text">Gestiona tu información personal.</p>
+                    <a href="{% url 'perfil' %}" class="btn btn-primary">Ver Perfil</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

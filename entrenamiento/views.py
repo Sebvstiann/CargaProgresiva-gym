@@ -2,14 +2,38 @@
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from .forms import RegistroEntrenamientoForm
+from .forms import RegistroEntrenamientoForm, CompletarPerfilForm
 from .models import RegistroEntrenamiento, Rutina, Ejercicio
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from .forms import UsuarioRegistroForm
 from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
+from openpyxl import Workbook
+from datetime import datetime
+
+@login_required
+def ejercicios_por_rutina(request, rutina_id):
+    """Vista para obtener los ejercicios de una rutina específica"""
+    ejercicios = Ejercicio.objects.filter(rutina_id=rutina_id).values('id', 'nombre')
+    return JsonResponse({'ejercicios': list(ejercicios)})
+
+@login_required
+def ejercicio_info(request, ejercicio_id):
+    """Vista para obtener la información detallada de un ejercicio"""
+    ejercicio = get_object_or_404(Ejercicio, id=ejercicio_id)
+    return JsonResponse({
+        'nombre': ejercicio.nombre,
+        'descripcion': ejercicio.descripcion,
+        'imagen': ejercicio.imagen.url if ejercicio.imagen else None
+    })
+
+@login_required
+def inicio(request):
+    if not request.user.perfil_completo():
+        return redirect('completar_perfil')
+    return render(request, 'entrenamiento/inicio.html')
 
 class CustomLoginView(LoginView):
     template_name = 'registration/login.html'
@@ -21,17 +45,55 @@ class CustomLoginView(LoginView):
     
     def post(self, request, *args, **kwargs):
         if 'register' in request.POST:
+            print("Intento de registro detectado")  # Debug
             register_form = UsuarioRegistroForm(request.POST)
+            print("Datos del formulario:", request.POST)  # Debug
+            
             if register_form.is_valid():
-                register_form.save()
-                messages.success(request, "¡Te has registrado correctamente! Ahora puedes iniciar sesión.")
-                return redirect('login')
+                print("Formulario válido")  # Debug
+                try:
+                    user = register_form.save()
+                    print("Usuario guardado:", user)  # Debug
+                    messages.success(request, "¡Te has registrado correctamente! Ahora puedes iniciar sesión.")
+                    return render(request, self.template_name, {
+                        'form': self.get_form_class()(),
+                        'register_form': UsuarioRegistroForm(),
+                    })
+                except Exception as e:
+                    print("Error al guardar:", str(e))  # Debug
+                    messages.error(request, f"Error al crear la cuenta: {str(e)}")
             else:
-                # Si hay errores en el registro, mostrar el formulario con errores
-                context = self.get_context_data()
-                context['register_form'] = register_form
-                return render(request, self.template_name, context)
+                print("Errores del formulario:", register_form.errors)  # Debug
+                messages.error(request, "Por favor corrige los errores en el formulario.")
+            
+            return render(request, self.template_name, {
+                'form': self.get_form_class()(),
+                'register_form': register_form,
+            })
+            
         return super().post(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        if not self.request.user.perfil_completo():
+            return redirect('completar_perfil')
+        return response
+
+@login_required
+def completar_perfil(request):
+    if request.user.perfil_completo():
+        return redirect('perfil')
+        
+    if request.method == 'POST':
+        form = CompletarPerfilForm(request.POST, request.FILES, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, '¡Perfil completado correctamente!')
+            return redirect('perfil')
+    else:
+        form = CompletarPerfilForm(instance=request.user)
+    
+    return render(request, 'entrenamiento/completar_perfil.html', {'form': form})
 
 @login_required
 def registrar_entrenamiento(request):
@@ -43,10 +105,89 @@ def registrar_entrenamiento(request):
             registro.save()
             messages.success(request, '✅ Entrenamiento guardado correctamente.')
             return redirect('registrar_entrenamiento')
-        messages.error(request, '❌ Hubo un error al guardar el entrenamiento.')
+        else:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'Error en {field}: {error}')
     else:
         form = RegistroEntrenamientoForm()
     return render(request, 'entrenamiento/registrar_entrenamiento.html', {'form': form})
+
+@login_required
+def exportar_registros_excel(request):
+    # Obtener los filtros de la URL
+    rutina_id = request.GET.get('rutina')
+    ejercicio_id = request.GET.get('ejercicio')
+    fecha_inicio = request.GET.get('fecha_inicio')
+    fecha_fin = request.GET.get('fecha_fin')
+
+    # Filtrar registros
+    registros = RegistroEntrenamiento.objects.filter(usuario=request.user)
+    if rutina_id:
+        registros = registros.filter(rutina_id=rutina_id)
+    if ejercicio_id:
+        registros = registros.filter(ejercicio_id=ejercicio_id)
+    if fecha_inicio:
+        registros = registros.filter(fecha_hora__date__gte=fecha_inicio)
+    if fecha_fin:
+        registros = registros.filter(fecha_hora__date__lte=fecha_fin)
+
+    # Crear un nuevo libro de Excel
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Registros de Entrenamiento"
+
+    # Escribir encabezados
+    headers = [
+        'Fecha',
+        'Rutina',
+        'Ejercicio',
+        'Peso (KG)',
+        'Serie 1 (reps)',
+        'Serie 2 (reps)',
+        'Serie 3 (reps)',
+        'Rendimiento',
+        'Observaciones'
+    ]
+    for col, header in enumerate(headers, 1):
+        ws.cell(row=1, column=col, value=header)
+
+    # Escribir datos
+    for row, registro in enumerate(registros, 2):
+        ws.cell(row=row, column=1, value=registro.fecha_hora.strftime('%d/%m/%Y %H:%M'))
+        ws.cell(row=row, column=2, value=registro.rutina.nombre if registro.rutina else '')
+        ws.cell(row=row, column=3, value=registro.ejercicio.nombre if registro.ejercicio else '')
+        ws.cell(row=row, column=4, value=registro.peso_agregado_KG)
+        ws.cell(row=row, column=5, value=registro.repeticiones_en_la_primera_serie)
+        ws.cell(row=row, column=6, value=registro.repeticiones_en_la_segunda_serie)
+        ws.cell(row=row, column=7, value=registro.repeticiones_en_la_tercera_serie)
+        ws.cell(row=row, column=8, value=registro.rendimiento_percibido)
+        ws.cell(row=row, column=9, value=registro.observaciones)
+
+    # Ajustar el ancho de las columnas
+    for column in ws.columns:
+        max_length = 0
+        column_letter = column[0].column_letter
+        for cell in column:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(str(cell.value))
+            except:
+                pass
+        adjusted_width = (max_length + 2)
+        ws.column_dimensions[column_letter].width = adjusted_width
+
+    # Crear la respuesta HTTP con el archivo Excel
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename=registros_entrenamiento_{}.xlsx'.format(
+        datetime.now().strftime('%Y%m%d_%H%M%S')
+    )
+
+    # Guardar el libro de Excel en la respuesta
+    wb.save(response)
+    return response
 
 @login_required
 def ver_registros(request):
@@ -90,6 +231,9 @@ def eliminar_registro(request, registro_id):
 
 @login_required
 def perfil(request):
+    if not request.user.perfil_completo():
+        return redirect('completar_perfil')
+        
     ejercicios = Ejercicio.objects.all()
     return render(request, 'entrenamiento/perfil.html', {
         'ejercicios': ejercicios
